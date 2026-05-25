@@ -1,0 +1,9 @@
+services:
+  gin-http-server:
+    container_name: gin-http-server
+    build: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ./configs:/configs
+    restart: always

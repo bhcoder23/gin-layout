@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golang-per-day-24
+  namespace: codee-jun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: golang-per-day-24
+  template:
+    metadata:
+      labels:
+        app: golang-per-day-24
+    spec:
+      containers:
+        - name: golang-per-day-24
+          image: golang_per_day_24:latest
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: runtime-dir
+              mountPath: /configs
+              subPath: runtime/golang_per_day_24/configs
+          resources:
+            requests:
+              cpu: 35m
+              memory: 380Mi
+            limits:
+              cpu: 70m
+              memory: 500Mi
+      volumes:
+        - name: runtime-dir
+          persistentVolumeClaim:
+            claimName: nfs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: golang-per-day-24
+  namespace: codee-jun
+spec:
+  # externalIPs:
+  #   - 123.59.187.137
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  sessionAffinity: ClientIP
+  selector:
+    app: golang-per-day-24
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: golang-per-day-24-hpa
+  namespace: codee-jun
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: golang-per-day-24
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90
