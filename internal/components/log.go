@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func InitLog() {
+func InitLog() error {
 	var logger *zap.Logger
 	var err error
 	if gin.Mode() == gin.DebugMode {
@@ -15,7 +15,8 @@ func InitLog() {
 		logger, err = zap.NewProduction()
 	}
 	if err != nil {
-		panic("init zap failed!: " + err.Error())
+		return err
 	}
 	zap.ReplaceGlobals(logger)
+	return nil
 }

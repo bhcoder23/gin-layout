@@ -29,7 +29,9 @@ func StartHTTPServer(ctx context.Context, host string, port int) error {
 	}
 
 	gin.SetMode(NormalizeGinMode(viper.GetString("server.mode")))
-	components.Init()
+	if err := components.Init(); err != nil {
+		return err
+	}
 	if err := migrates.DoMigrate(); err != nil {
 		return err
 	}

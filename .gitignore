@@ -1,0 +1,14 @@
+# Build artifacts
+/gin-layout
+/golang_per_day
+/coverage.out
+
+# Local environment and runtime configuration
+.env
+configs/config.local.yaml
+configs/config.*.local.yaml
+
+# Editor and OS metadata
+.DS_Store
+.idea/
+.vscode/

@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,12 +14,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func getSecret() []byte {
+func getSecret() ([]byte, error) {
 	s := viper.GetString("jwt.secret")
 	if s == "" {
-		panic("please add jwt.secret in config")
+		return nil, errors.New("missing jwt.secret")
 	}
-	return []byte(s)
+	return []byte(s), nil
 }
 
 func GenerateToken(userID uint) (string, error) {
@@ -33,12 +34,16 @@ func GenerateToken(userID uint) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(getSecret())
+	secret, err := getSecret()
+	if err != nil {
+		return "", err
+	}
+	return token.SignedString(secret)
 }
 
 func ParseToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
-		return getSecret(), nil
+		return getSecret()
 	})
 	if err != nil {
 		return nil, err
